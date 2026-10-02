@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DSE 經濟 Master: GDP & GNI 實戰挑戰賽</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        dse: {
+                            navy: '#0b132b',
+                            blue: '#1c2541',
+                            accent: '#3a506b',
+                            gold: '#f59e0b',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            purple: '#8b5cf6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            background-color: #0b132b;
+            color: #f8fafc;
+        }
+
+        .glass-panel {
+            background: rgba(28, 37, 65, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .inline-explain-enter {
+            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(11, 19, 43, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a506b;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased overflow-x-hidden selection:bg-amber-500 selection:text-slate-900">
+
+    <!-- Sticky Header -->
+    <header class="w-full glass-panel sticky top-0 z-40 px-4 py-3 border-b border-slate-700/80 shadow-md">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goHome()">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-slate-950 font-black text-xl shadow-md">
+                    🎓
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-black tracking-wide text-amber-400 leading-tight">DSE 經濟 Master</h1>
+                    <p class="text-[11px] text-slate-400 font-medium">GDP & GNI 歷屆特訓與 (1)(2)(3) 題型強攻</p>
+                </div>
+            </div>
+
+            <div id="header-stats" class="flex items-center space-x-2 sm:space-x-3">
+                <div id="score-container" class="hidden sm:flex bg-slate-900/90 px-3 py-1 rounded-full border border-slate-700 text-xs items-center space-x-1.5">
+                    <span class="text-amber-400">⭐</span>
+                    <span id="score-display" class="font-bold text-amber-300">0</span>
+                </div>
+                <div id="streak-container" class="hidden sm:flex bg-slate-900/90 px-3 py-1 rounded-full border border-slate-700 text-xs items-center space-x-1.5">
+                    <span class="text-rose-400">🔥</span>
+                    <span id="streak-display" class="font-bold text-rose-300">0</span>
+                </div>
+                <button id="audio-toggle" onclick="toggleAudio()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-400 border border-slate-700 transition" title="開關音效">
+                    🔊
+                </button>
+                <button onclick="toggleCheatSheet(true)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold border border-indigo-400/40 transition shadow-md flex items-center space-x-1">
+                    <span>📖</span>
+                    <span class="hidden sm:inline">DSE 秘笈</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+        <!-- 1. WELCOME / MODE SELECTION SCREEN -->
+        <section id="screen-welcome" class="space-y-6 text-center py-4 my-auto">
+            <div class="space-y-3">
+                <span class="inline-block px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold tracking-widest uppercase">
+                    HKDSE Economics Exam Mastery Series
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-black text-white leading-tight">
+                    GDP & GNI <br><span class="bg-gradient-to-r from-amber-400 via-amber-300 to-rose-400 bg-clip-text text-transparent">DSE 歷屆題型與組合考點挑戰賽</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+                    嚴格按照 HKDSE 考評局用語及 CE/DSE 經典試題標準編製。特別加強 <span class="text-amber-300 font-bold">(1)(2)(3) 組合選擇題</span> 及常考計算，所有題解均於同頁展開對照學習！
+                </p>
+            </div>
+
+            <!-- Mode Selection Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-left my-6">
+                <div onclick="startGame('part1')" class="glass-panel p-4 sm:p-5 rounded-2xl border border-indigo-500/30 hover:border-indigo-400/80 hover:bg-slate-800/90 transition cursor-pointer group shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-2xl group-hover:scale-110 transition">🏙</span>
+                        <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">Part 1</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-100 group-hover:text-amber-300 transition">Part 1: GDP 判定特訓</h3>
+                    <p class="text-xs text-slate-400 mt-1.5 leading-normal">聚焦常住生產單位、當期生產、二手貨物、金融資產及轉移支付等判定。</p>
+                </div>
+
+                <div onclick="startGame('part2')" class="glass-panel p-4 sm:p-5 rounded-2xl border border-emerald-500/30 hover:border-emerald-400/80 hover:bg-slate-800/90 transition cursor-pointer group shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-2xl group-hover:scale-110 transition">🌏</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Part 2</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-100 group-hover:text-emerald-300 transition">Part 2: GNI & 要素收益流動</h3>
+                    <p class="text-xs text-slate-400 mt-1.5 leading-normal">拆解常住居民概念（12個月原則）、僱員報酬、投資收益及對外要素收益流動 (NFI)。</p>
+                </div>
+
+                <div onclick="startGame('part3')" class="glass-panel p-4 sm:p-5 rounded-2xl border border-purple-500/40 hover:border-purple-400/90 hover:bg-slate-800/90 transition cursor-pointer group shadow-lg ring-1 ring-purple-500/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-2xl group-hover:scale-110 transition">🔥</span>
+                        <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">Part 3 綜合戰</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-100 group-hover:text-purple-300 transition">Part 3: DSE MC 模擬與組合題</h3>
+                    <p class="text-xs text-slate-300 mt-1.5 leading-normal">收錄 CE2006/2010 經典題及豐富的 <strong class="text-amber-300">(1)(2)(3) 組合試題</strong>，全方位模擬考場實戰！</p>
+                </div>
+            </div>
+
+            <!-- Start Game Full CTA Button -->
+            <div class="space-y-3 pt-2">
+                <button onclick="startGame('all')" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-lg shadow-xl shadow-amber-500/20 active:scale-[0.98] transition">
+                    🏆 開始全套 DSE 終極特訓 (Part 1 + 2 + 3 完整全試卷)
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. GAMEPLAY ARENA SCREEN -->
+        <section id="screen-game" class="hidden flex-1 flex flex-col justify-between py-2 space-y-4">
+            
+            <!-- Progress Bar & Stage Indicator -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span id="stage-badge" class="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center space-x-1">
+                        <span>第一部分：GDP 判定特訓</span>
+                    </span>
+                    <span id="question-progress" class="text-xs font-bold text-slate-400">
+                        問題 1 / 20
+                    </span>
+                </div>
+                <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-700/60">
+                    <div id="progress-bar" class="bg-gradient-to-r from-amber-500 via-purple-500 to-emerald-400 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- Question Card Container -->
+            <div id="question-container" class="glass-panel rounded-3xl p-5 sm:p-7 shadow-2xl border border-slate-700/80 flex flex-col justify-between space-y-4">
+                
+                <div class="flex justify-between items-start">
+                    <span id="card-tag" class="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/30">
+                        [考點標籤]
+                    </span>
+                    <span id="card-ref-badge" class="px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[11px] font-mono border border-slate-700">
+                        HKDSE Exam
+                    </span>
+                </div>
+
+                <div class="py-1">
+                    <p id="card-question" class="text-sm sm:text-base md:text-lg font-medium text-slate-100 leading-relaxed whitespace-pre-line">
+                        題目載入中...
+                    </p>
+                </div>
+
+                <!-- Binary Choice Controls (Part 1 & 2) -->
+                <div id="controls-binary" class="grid grid-cols-2 gap-3.5 pt-2">
+                    <button id="btn-binary-false" onclick="handleBinaryChoice(false)" class="option-btn group py-4 px-3 rounded-2xl bg-slate-900/90 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/60 active:scale-95 transition shadow-lg flex flex-col items-center justify-center">
+                        <span class="text-2xl mb-1 group-hover:scale-110 transition">❌</span>
+                        <span id="btn-label-false" class="font-bold text-rose-300 text-sm sm:text-base">不計入 / 扣減</span>
+                        <span id="btn-sub-false" class="text-[10px] text-slate-400">Excluded / Deducted</span>
+                    </button>
+                    <button id="btn-binary-true" onclick="handleBinaryChoice(true)" class="option-btn group py-4 px-3 rounded-2xl bg-slate-900/90 hover:bg-emerald-950/60 border border-slate-700 hover:border-emerald-500/60 active:scale-95 transition shadow-lg flex flex-col items-center justify-center">
+                        <span class="text-2xl mb-1 group-hover:scale-110 transition">✅</span>
+                        <span id="btn-label-true" class="font-bold text-emerald-300 text-sm sm:text-base">計入 GDP / GNI</span>
+                        <span id="btn-sub-true" class="text-[10px] text-slate-400">Included</span>
+                    </button>
+                </div>
+
+                <!-- Multiple Choice Controls (Part 3 MC) -->
+                <div id="controls-mc" class="hidden grid grid-cols-1 gap-2.5 pt-1">
+                    <button id="mc-btn-0" onclick="handleMCChoice(0)" class="option-btn mc-btn w-full p-3.5 rounded-2xl bg-slate-900 hover:bg-indigo-950/80 border border-slate-700 hover:border-indigo-500/60 text-left flex items-start space-x-3 transition active:scale-[0.99] group">
+                        <span id="mc-tag-0" class="bg-indigo-600 group-hover:bg-indigo-500 text-white w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow">A</span>
+                        <span id="mc-opt-0" class="text-xs sm:text-sm text-slate-200 leading-snug">選項 A</span>
+                    </button>
+                    <button id="mc-btn-1" onclick="handleMCChoice(1)" class="option-btn mc-btn w-full p-3.5 rounded-2xl bg-slate-900 hover:bg-indigo-950/80 border border-slate-700 hover:border-indigo-500/60 text-left flex items-start space-x-3 transition active:scale-[0.99] group">
+                        <span id="mc-tag-1" class="bg-indigo-600 group-hover:bg-indigo-500 text-white w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow">B</span>
+                        <span id="mc-opt-1" class="text-xs sm:text-sm text-slate-200 leading-snug">選項 B</span>
+                    </button>
+                    <button id="mc-btn-2" onclick="handleMCChoice(2)" class="option-btn mc-btn w-full p-3.5 rounded-2xl bg-slate-900 hover:bg-indigo-950/80 border border-slate-700 hover:border-indigo-500/60 text-left flex items-start space-x-3 transition active:scale-[0.99] group">
+                        <span id="mc-tag-2" class="bg-indigo-600 group-hover:bg-indigo-500 text-white w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow">C</span>
+                        <span id="mc-opt-2" class="text-xs sm:text-sm text-slate-200 leading-snug">選項 C</span>
+                    </button>
+                    <button id="mc-btn-3" onclick="handleMCChoice(3)" class="option-btn mc-btn w-full p-3.5 rounded-2xl bg-slate-900 hover:bg-indigo-950/80 border border-slate-700 hover:border-indigo-500/60 text-left flex items-start space-x-3 transition active:scale-[0.99] group">
+                        <span id="mc-tag-3" class="bg-indigo-600 group-hover:bg-indigo-500 text-white w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow">D</span>
+                        <span id="mc-opt-3" class="text-xs sm:text-sm text-slate-200 leading-snug">選項 D</span>
+                    </button>
+                </div>
+
+                <!-- INLINE EXPLANATION PANEL (Appears directly below options on same card) -->
+                <div id="inline-explanation-panel" class="hidden mt-4 pt-4 border-t border-slate-700/80 space-y-3.5 inline-explain-enter">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span id="inline-result-icon" class="text-xl">✓</span>
+                            <span id="inline-result-title" class="font-black text-sm sm:text-base">回答正確！</span>
+                        </div>
+                        <span id="inline-concept-tag" class="px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold">
+                            [考點]
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line">
+                        <div class="font-bold text-amber-400 mb-1">【DSE Marking Scheme 解釋】</div>
+                        <p id="inline-explanation-text">解析內容...</p>
+                    </div>
+
+                    <button id="btn-next-question" onclick="nextQuestion()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-lg active:scale-[0.98] transition">
+                        下一題 (Next Question) ➔
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 3. DSE FORMULA & CHEAT SHEET MODAL -->
+        <div id="modal-cheatsheet" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+            <div class="w-full max-w-lg glass-panel rounded-3xl p-6 border border-slate-700/80 max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-slate-700/80 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl">📘</span>
+                        <h3 class="text-lg font-black text-amber-400">DSE 經濟科：GDP & GNI 秘笈</h3>
+                    </div>
+                    <button onclick="toggleCheatSheet(false)" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+                </div>
+
+                <div class="space-y-3.5 text-xs text-slate-300">
+                    <!-- Core Formula -->
+                    <div class="bg-indigo-950/60 p-4 rounded-2xl border border-indigo-500/30 space-y-1.5">
+                        <h4 class="font-bold text-indigo-300 text-sm">核心計算公式</h4>
+                        <p class="text-amber-300 font-mono text-sm py-1 font-bold">GNI = GDP + 對外要素收益流動淨值 (NFI)</p>
+                        <p class="text-slate-400 leading-relaxed">
+                            <strong class="text-white">對外要素收益流動淨值 (NFI)</strong> = 本地居民從外地獲得的要素收益（流入） - 外地居民從本地獲得的要素收益（流出）
+                        </p>
+                    </div>
+
+                    <!-- GDP Rules -->
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                        <h4 class="font-bold text-amber-400 text-sm">GDP 本地生產總值 4 大考點原則</h4>
+                        <ul class="list-disc pl-4 space-y-1.5 text-slate-300">
+                            <li><strong class="text-white">地理原則：</strong>必須在該經濟領土內從事生產。</li>
+                            <li><strong class="text-white">當期生產 (Current Production)：</strong>僅計入當期全新產出。二手貨轉售價格排除，但二手經紀佣金計入。</li>
+                            <li><strong class="text-white">最終產品：</strong>排除中間產品 (Intermediate Goods) 以防重複計算。</li>
+                            <li><strong class="text-white">排除非市場/轉移支付：</strong>綜援、津貼、零用錢、無償家務及純金融資產交易（股票本身）不計入。</li>
+                        </ul>
+                    </div>
+
+                    <!-- GNI & Resident Rules -->
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                        <h4 class="font-bold text-emerald-400 text-sm">GNI 常住居民與要素收益判定</h4>
+                        <ul class="list-disc pl-4 space-y-1.5 text-slate-300">
+                            <li><strong class="text-white">常住居民 (Resident Unit)：</strong>在該地區居住或營運滿 <span class="text-amber-300 font-bold">12 個月或以上</span> 的個人或企業（無視國籍）。留學生視為原居住地居民。</li>
+                            <li><strong class="text-white">要素收益 (Factor Income)：</strong>包括僱員報酬（工資）及投資收益（利息、股息、租金、純利）。</li>
+                            <li><strong class="text-white">非要素收益特例：</strong>遊客在港花費屬於「服務出口（計入 GDP）」，不屬於要素收益！資本增值 (Capital Gain) 及轉移支付均不計入 GNI。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button onclick="toggleCheatSheet(false)" class="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700">
+                    關閉秘笈
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. FINAL EXAM RESULTS & ERROR NOTEBOOK -->
+        <section id="screen-result" class="hidden py-4 space-y-6">
+            
+            <!-- Result Grade Card -->
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700/80 text-center space-y-4 relative overflow-hidden shadow-2xl">
+                <div class="inline-block p-4 rounded-3xl bg-slate-900/90 border border-slate-700/80 shadow-inner mb-1">
+                    <span id="result-grade-badge" class="text-4xl sm:text-6xl font-black bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+                        Level 5**
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-black text-white">DSE 模擬評級報告</h2>
+                    <p id="result-commentary" class="text-xs sm:text-sm text-slate-300 mt-1 max-w-md mx-auto leading-relaxed">
+                        概念掌握極度精準，直衝 DSE 5** 榮耀！
+                    </p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-3 gap-2.5 pt-2 text-center">
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">總得分</div>
+                        <div id="res-total-score" class="text-lg sm:text-xl font-bold text-amber-400">0</div>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">答對率</div>
+                        <div id="res-accuracy" class="text-lg sm:text-xl font-bold text-emerald-400">0%</div>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">最高連勝</div>
+                        <div id="res-max-streak" class="text-lg sm:text-xl font-bold text-rose-400">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ERROR NOTEBOOK (錯題分析本) -->
+            <div class="glass-panel p-5 rounded-3xl border border-slate-700/80 space-y-3.5 shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xl">📓</span>
+                        <h3 class="font-bold text-base text-slate-100">DSE 錯題溫習本 (Mistake Review)</h3>
+                    </div>
+                    <span id="mistake-count-badge" class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/30">
+                        0 題需要重溫
+                    </span>
+                </div>
+
+                <div id="mistake-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                    <!-- Dynamic mistakes injected here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="resetGame()" class="flex-1 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg border border-indigo-400/30 active:scale-[0.98] transition">
+                    🔄 重新挑戰本特訓
+                </button>
+                <button onclick="goHome()" class="flex-1 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 active:scale-[0.98] transition">
+                    🏠 返回主頁模式選擇
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Web Audio Synthesizer
+        let audioEnabled = true;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById('audio-toggle');
+            btn.innerText = audioEnabled ? '🔊' : '🔇';
+            btn.classList.toggle('opacity-50', !audioEnabled);
+        }
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            initAudio();
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(164.81, now + 0.1); // E3
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'combo') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(587.33, now); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch (e) {
+                // Ignore audio context errors
+            }
+        }
+
+        const questionBank = {
+            part1: [
+                {
+                    id: 'p1_1',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '港鐵公司（MTR）本年度向香港乘客收取的載客車資收益共有 120 億港元。這筆收益是否計入香港 GDP？',
+                    conceptTag: '常住生產單位當期服務',
+                    type: 'binary',
+                    correct: true,
+                    explanation: '港鐵為香港常住生產單位，在香港經濟領土內提供當期交通運輸服務，其車資收入屬於當期市場生產價值，全數計入 GDP。'
+                },
+                {
+                    id: 'p1_2',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '特區政府向全港合資格成年居民發放 $5,000 電子消費券。發放消費券的資金金額是否計入 GDP？',
+                    conceptTag: '轉移支付 Transfer Payment',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '政府發放消費券屬於單向資金無償轉移（轉移支付），發放過程並不對應任何當期全新貨品或服務的生產，故發放金額不計入 GDP。'
+                },
+                {
+                    id: 'p1_3',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '地產代理成功撮合一宗 10 年樓齡二手住宅交易，收取 $10 萬元經紀佣金。這筆佣金是否計入 GDP？',
+                    conceptTag: '二手交易經紀佣金',
+                    type: 'binary',
+                    correct: true,
+                    explanation: '二手物業自身的成交金額不計入當期 GDP，但地產代理提供的專業撮合服務是當期產出的全新市場服務，其佣金收益必須計入 GDP。'
+                },
+                {
+                    id: 'p1_4',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '香港自置居所業主入住自己擁有物業所享受的「估算租金」（Imputed Rent）。這筆估算價值是否計入 GDP？',
+                    conceptTag: '自置居所估算租金',
+                    type: 'binary',
+                    correct: true,
+                    explanation: '為保持 GDP 核算完整性及避免業主與租客身份轉換影響數據，香港政府統計處會將自置業主自住住房服務按市場租金估算，計入 GDP。'
+                },
+                {
+                    id: 'p1_5',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '建造業承包商在興建公共房屋過程中購入用作建築的鋼筋與水泥材料。這些材料費用是否另行計入 GDP？',
+                    conceptTag: '中間產品 Intermediate Goods',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '鋼筋與水泥屬於中間產品（在生產過程中被完全消耗）。最終產品為興建完成的樓宇，若將中間材料另行計算會造成重複計算（Double Counting）。'
+                },
+                {
+                    id: 'p1_6',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '家庭主婦每天在家照顧家人及烹煮三餐的無償家務勞動估算價值。這筆價值是否計入 GDP？',
+                    conceptTag: '非市場生產 Non-market Production',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '自用的無償家務勞動屬於非市場生產，缺乏市場交易價格且難以客觀估值，按照國際標準及 DSE GDP 核算慣例不予計入。'
+                },
+                {
+                    id: 'p1_7',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '某市民購買六合彩幸運中頭獎獲得 $2,000 萬元彩金。這筆彩金是否計入 GDP？',
+                    conceptTag: '博彩彩金非生產性',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '中獎彩金僅屬於財富在參與者之間的無償重新分配（資金轉移），過程並不涉及全新貨品或服務的生產，因此不計入 GDP。'
+                },
+                {
+                    id: 'p1_8',
+                    stage: 1,
+                    ref: 'HKDSE 核心考點',
+                    title: '二手車商以 $8 萬購入二手私家車，翻新檢驗後以 $10 萬售出，中間賺取 $2 萬元經銷加值服務。這 $2 萬元是否計入 GDP？',
+                    conceptTag: '二手經銷加值服務',
+                    type: 'binary',
+                    correct: true,
+                    explanation: '二手車本身的 $8 萬元轉售價排除在當期 GDP 外，但車商翻新與經銷服務所產生的 $2 萬元附加價值（Value Added）屬於當期全新服務，計入 GDP。'
+                }
+            ],
+            part2: [
+                {
+                    id: 'p2_1',
+                    stage: 2,
+                    ref: 'HKDSE 核心考點',
+                    title: '常住香港超過 10 年的工程師，受聘至澳門短暫工作 2 個月，獲得 8 萬港元薪金。這筆薪金是否計入香港 GNI？',
+                    conceptTag: '常住居民對外僱員報酬',
+                    type: 'binary',
+                    correct: true,
+                    explanation: '該工程師為香港常住居民（在港居住遠超12個月），其在澳門獲得的薪金屬於僱員報酬（要素收益）。常住居民從外地賺取的要素收益屬於「流入」，應計入香港 GNI。'
+                },
+                {
+                    id: 'p2_2',
+                    stage: 2,
+                    ref: 'HKDSE 核心考點',
+                    title: '移居海外超過 3 年的移民（非香港常住居民），賣出其持有的香港股票獲利 $5 萬元（資本增值）。這筆獲利是否計入香港 GNI？',
+                    conceptTag: '資本增值 Capital Gain 判定',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '第一，該移民已非香港常住居民；第二，股票價格升值獲得的資本增值（Capital Gain）不屬於「要素收益」（Factor Income），故絕不計入 GNI。'
+                },
+                {
+                    id: 'p2_3',
+                    stage: 2,
+                    ref: 'HKDSE 核心考點',
+                    title: '美國蘋果公司（外國常住單位）將其香港分公司在港賺取的 5,000 萬元純利匯回美國總部。這筆純利在計算香港 GNI 時是否應包含在內？',
+                    conceptTag: '要素收益流出 Factor Income Outflow',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '這筆利潤屬於外地常住居民（美國母公司）從香港獲得的投資收益（要素收益流出），在計算香港 GNI 時必須從 GDP 中扣除，故不屬於香港 GNI。'
+                },
+                {
+                    id: 'p2_4',
+                    stage: 2,
+                    ref: 'HKDSE 核心考點',
+                    title: '特區政府向居住在廣東省滿 65 歲的香港長者發放「廣東計劃」長者生活津貼。這筆津貼是否屬於香港的對外要素收益流動？',
+                    conceptTag: '轉移支付非要素收益',
+                    type: 'binary',
+                    correct: false,
+                    explanation: '政府生活津貼屬於單向無償「轉移支付」（Transfer Payment），而非向生產要素支付的「要素收益」（僱員報酬或投資收益），因此不屬於對外要素收益流動，不影響 NFI。'
+                },
+                {
+                    id: 'p2_5',
+                    stage: 2,
+                    ref: 'HKDSE 核心考點',
+                    title: '香港某上市銀行在新加坡設立的分行在當地賺取 $1 億港元純利並匯回香港。這筆純利是否計入香港 GNI？',
+                    conceptTag: '本地居民海外投資收益流入',
+                    type: 'binary',
+                    correct: true,
+                    explanation: '香港上市銀行屬於香港常住居民單位，其在外地分行獲得的純利屬於「本地居民從外地獲得的投資收益（要素收益流入）」，必須加至 GDP 計算 GNI。'
+                }
+            ],
+            part3: [
+                {
+                    id: 'p3_ce2006_q29',
+                    stage: 3,
+                    ref: 'CE/2006/Q29 (經修改)',
+                    title: '下列哪項不應被包括入香港的對外要素收益流動淨值（NFI）的計算之內？\n\nA. 某日本遊客在香港的花費\nB. 某美國歌手在香港舉行兩場演唱會所賺獲的收入\nC. 香港某居民在英國投資物業所賺獲的租金收入\nD. 香港某居民從瑞士某銀行的儲蓄存款賺獲的利息',
+                    conceptTag: 'CE 經典考題: NFI vs 服務出口',
+                    type: 'mc',
+                    options: [
+                        '某日本遊客在香港的花費',
+                        '某美國歌手在香港舉行兩場演唱會所賺獲的收入',
+                        '香港某居民在英國投資物業所賺獲的租金收入',
+                        '香港某居民從瑞士某銀行的儲蓄存款賺獲的利息'
+                    ],
+                    correct: 0,
+                    explanation: '【正確答案：A】\n• 日本遊客在港花費屬於香港的「服務出口」（Export of Services），直接計入 GDP，而非要素收益流動。\n• B項屬於外地居民從香港獲得的要素收益（流出）；C及D項屬於本地居民從外地獲得的要素收益（流入），三者均屬 NFI 的計算範圍。'
+                },
+                {
+                    id: 'p3_ce2010_q30',
+                    stage: 3,
+                    ref: 'CE/2010/Q30 (經修改)',
+                    title: '若要計算本地居民總收入（GNI），應將下列哪項從香港的本地生產總值（GDP）中扣減出來？\n\nA. 一位內地投資者從他在香港的住宅單位收取的租金\nB. 一位香港居民從他在美國股市投資中收取的股息\nC. 一位香港富豪大亨所設立用以津貼內地學生在香港求學的獎學金\nD. 一位香港居民為一家英資銀行在香港的分行工作所收取的薪酬',
+                    conceptTag: 'CE 經典考題: GNI 扣減項目',
+                    type: 'mc',
+                    options: [
+                        '一位內地投資者從他在香港的住宅單位收取的租金',
+                        '一位香港居民從他在美國股市投資中收取的股息',
+                        '一位香港富豪大亨所設立用以津貼內地學生在香港求學的獎學金',
+                        '一位香港居民為一家英資銀行在香港的分行工作所收取的薪酬'
+                    ],
+                    correct: 0,
+                    explanation: '【正確答案：A】\n根據公式：GNI = GDP + 流入 - 流出。\n• 內地投資者（非常住居民）從香港住宅獲得的租金屬於「非常住居民從本地獲得的要素收益」（流出），故計算 GNI 時須從 GDP 中扣減！\n• B項屬流入（應加上）；C項屬轉移支付；D項屬本地居民在本地獲得的要素收益。'
+                },
+                {
+                    id: 'p3_gdp_classic',
+                    stage: 3,
+                    ref: 'DSE 經典問法',
+                    title: '下列哪項會包括在香港本地生產總值（GDP）的計算之內？\n\nA. 某學生所購買的一輛二手單車的價值\nB. 某經紀協助客戶交易股票所賺取的佣金\nC. 某住戶轉售一間住宅物業所賺取的資本增值\nD. 有需要人士在綜合社會保障援助計劃下所收取的援助金',
+                    conceptTag: 'DSE 經典題: GDP 包含項目',
+                    type: 'mc',
+                    options: [
+                        '某學生所購買的一輛二手單車的價值',
+                        '某經紀協助客戶交易股票所賺取的佣金',
+                        '某住戶轉售一間住宅物業所賺取的資本增值',
+                        '有需要人士在綜合社會保障援助計劃下所收取的援助金'
+                    ],
+                    correct: 1,
+                    explanation: '【正確答案：B】\n• 股票經紀提供當期撮合交易服務，其佣金屬於當期生產服務價值，必須計入 GDP。\n• A屬二手貨物轉讓；C屬資產價格重估的資本增值；D屬政府轉移支付，三者均不計入 GDP。'
+                },
+                {
+                    id: 'p3_comb_1',
+                    stage: 3,
+                    ref: 'DSE 組合題型 (1)(2)(3)',
+                    title: '下列哪項 / 幾項會計入香港當期的本地生產總值（GDP）？\n\n(1) 某地產代理成功撮合二手樓宇交易收取的佣金\n(2) 香港自置居所業主自住物業的估算租金\n(3) 某住宅物業因樓價上升所產生的資本增值\n\nA. 只有 (1)\nB. 只有 (1) 和 (2)\nC. 只有 (2) 和 (3)\nD. (1)、(2) 和 (3)',
+                    conceptTag: 'DSE 題型: (1)(2)(3) 組合判定',
+                    type: 'mc',
+                    options: [
+                        '只有 (1)',
+                        '只有 (1) 和 (2)',
+                        '只有 (2) 和 (3)',
+                        '(1)、(2) 和 (3)'
+                    ],
+                    correct: 1,
+                    explanation: '【正確答案：B】\n• (1) 正確：經紀佣金是當期提供全新中介服務的報酬，計入 GDP。\n• (2) 正確：自置居所業主自住物業按考評局原則，估算租金須計入 GDP。\n• (3) 錯誤：資本增值（Capital Gain）僅屬資產價格變動，不代表全新生產，不計入 GDP。'
+                },
+                {
+                    id: 'p3_comb_2',
+                    stage: 3,
+                    ref: 'DSE 組合題型 (1)(2)(3)',
+                    title: '下列哪項 / 幾項屬於香港的「對外要素收益流入」（Factor Income Inflow）？\n\n(1) 居住在香港超過一年的張先生從美國公司股票收取的股息\n(2) 香港某跨國銀行在新加坡分行獲得並匯回香港的純利\n(3) 美國某流行歌手來港舉辦兩場演唱會獲得的演酬\n\nA. 只有 (1)\nB. 只有 (1) 和 (2)\nC. 只有 (2) 和 (3)\nD. (1)、(2) 和 (3)',
+                    conceptTag: 'DSE 題型: 要素收益流入判定',
+                    type: 'mc',
+                    options: [
+                        '只有 (1)',
+                        '只有 (1) 和 (2)',
+                        '只有 (2) 和 (3)',
+                        '(1)、(2) 和 (3)'
+                    ],
+                    correct: 1,
+                    explanation: '【正確答案：B】\n• (1) 及 (2) 均屬於香港常住居民（張先生及香港跨國銀行）從外地獲得的投資收益，屬於對外要素收益流入（加上至 GNI）。\n• (3) 屬於外地居民（美國歌手）從香港獲得的要素收益，屬於「要素收益流出」（Outflow）。'
+                },
+                {
+                    id: 'p3_comb_3',
+                    stage: 3,
+                    ref: 'DSE 組合題型 (1)(2)(3)',
+                    title: '下列哪項 / 幾項既不計入香港的 GDP，亦不計入香港的 GNI？\n\n(1) 某全日制大學生獲得政府發放的大專助學金\n(2) 某居民轉售持有兩年的二手私家車所得的款項\n(3) 某市民在澳門賭場幸運贏取的彩金\n\nA. 只有 (1)\nB. 只有 (1) 和 (2)\nC. 只有 (2) 和 (3)\nD. (1)、(2) 和 (3)',
+                    conceptTag: 'DSE 題型: 兩者皆排除項目',
+                    type: 'mc',
+                    options: [
+                        '只有 (1)',
+                        '只有 (1) 和 (2)',
+                        '只有 (2) 和 (3)',
+                        '(1)、(2) 和 (3)'
+                    ],
+                    correct: 3,
+                    explanation: '【正確答案：D】\n• (1) 屬政府單向轉移支付；\n• (2) 屬二手物品轉讓（非當期生產）；\n• (3) 博彩彩金屬資金轉移及非要素收益，三者均不對應當期要素生產，故既不計入 GDP，亦不計入 GNI！'
+                },
+                {
+                    id: 'p3_calc_1',
+                    stage: 3,
+                    ref: 'DSE 模擬題',
+                    title: '已知某經濟體數據如下：\n• GDP = $8,000 億\n• 本地常住居民從外地獲得的投資收益 = $600 億\n• 外地居民從本國獲得的僱員報酬 = $400 億\n• 政府向居民發放的社會福利津貼 = $150 億\n\n該經濟體的 GNI 為多少？\n\nA. $8,200 億\nB. $8,350 億\nC. $8,000 億\nD. $7,800 億',
+                    conceptTag: 'DSE 題型: GNI 數據計算',
+                    type: 'mc',
+                    options: [
+                        '$8,200 億',
+                        '$8,350 億',
+                        '$8,000 億',
+                        '$7,800 億'
+                    ],
+                    correct: 0,
+                    explanation: '【正確答案：A】\nGNI = GDP + 對外要素收益流入 - 對外要素收益流出\nGNI = $8,000 億 + $600 億 (流入) - $400 億 (流出) = $8,200 億。\n注意：政府社會福利津貼（$150 億）屬轉移支付，並不屬於要素收益，切勿加入計算！'
+                },
+                {
+                    id: 'p3_comb_4',
+                    stage: 3,
+                    ref: 'DSE 組合題型 (1)(2)(3)',
+                    title: '下列哪些人士在經濟學概念上屬於香港的「常住居民」（Resident Unit）？\n\n(1) 在香港某大學就讀四年制學士學位的內地留學生\n(2) 在香港分行短期工作了兩個月的英國籍臨時審計師\n(3) 在香港註冊並已在港營運超過兩年的外資投資銀行\n\nA. 只有 (1) 和 (2)\nB. 只有 (1) 和 (3)\nC. 只有 (2) 和 (3)\nD. (1)、(2) 和 (3)',
+                    conceptTag: 'DSE 題型: 常住居民定義 (12個月原則)',
+                    type: 'mc',
+                    options: [
+                        '只有 (1) 和 (2)',
+                        '只有 (1) 和 (3)',
+                        '只有 (2) 和 (3)',
+                        '(1)、(2) 和 (3)'
+                    ],
+                    correct: 1,
+                    explanation: '【正確答案：B】\n• (1) 正確：根據國際及 DSE 核算慣例，留學生不論居留多久，均被視為其原居地/經濟領土的常住居民（香港留學生視為香港常住居民）。\n• (2) 錯誤：居留不足12個月的臨時員工屬於非常住居民。\n• (3) 正確：在本地營運12個月以上的企業屬於本地常住生產單位。'
+                },
+                {
+                    id: 'p3_mc_5',
+                    stage: 3,
+                    ref: 'DSE 模擬題',
+                    title: '香港某企業完全由內地母公司持有，當期在香港設廠生產，獲得純利 $3,000 萬港元，並將其中 $2,000 萬匯回內地。這對香港的 GDP 和 GNI 有何影響？\n\nA. GDP 增加 $3,000 萬，GNI 增加 $1,000 萬\nB. GDP 增加 $3,000 萬，GNI 增加 $3,000 萬\nC. GDP 不變，GNI 減少 $2,000 萬\nD. GDP 增加 $1,000 萬，GNI 增加 $1,000 萬',
+                    conceptTag: 'DSE 題型: GDP 與 GNI 差異調整',
+                    type: 'mc',
+                    options: [
+                        'GDP 增加 $3,000 萬，GNI 增加 $1,000 萬',
+                        'GDP 增加 $3,000 萬，GNI 增加 $3,000 萬',
+                        'GDP 不變，GNI 減少 $2,000 萬',
+                        'GDP 增加 $1,000 萬，GNI 增加 $1,000 萬'
+                    ],
+                    correct: 0,
+                    explanation: '【正確答案：A】\n• 該企業在港生產，當期價值 $3,000 萬全數計入香港 GDP（+$3,000萬）。\n• 匯回內地的 $2,000 萬純利屬於「非常住居民從香港獲得的投資收益」（要素收益流出）。\n• 香港 GNI = GDP (3,000) - 流出 (2,000) = +$1,000 萬。'
+                }
+            ]
+        };
+
+        let gameState = {
+            mode: 'all',
+            currentQuestions: [],
+            currentIndex: 0,
+            score: 0,
+            streak: 0,
+            maxStreak: 0,
+            userAnswers: [],
+            hasAnsweredCurrent: false
+        };
+
+        function goHome() {
+            document.getElementById('screen-welcome').classList.remove('hidden');
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('header-stats').classList.add('hidden');
+        }
+
+        function startGame(mode) {
+            initAudio();
+            gameState.mode = mode;
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.streak = 0;
+            gameState.maxStreak = 0;
+            gameState.userAnswers = [];
+            gameState.hasAnsweredCurrent = false;
+
+            if (mode === 'all') {
+                gameState.currentQuestions = [
+                    ...questionBank.part1,
+                    ...questionBank.part2,
+                    ...questionBank.part3
+                ];
+            } else {
+                gameState.currentQuestions = [...questionBank[mode]];
+            }
+
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('header-stats').classList.remove('hidden');
+
+            updateHeaderStats();
+            renderQuestion();
+        }
+
+        function updateHeaderStats() {
+            document.getElementById('score-display').innerText = gameState.score;
+            document.getElementById('streak-display').innerText = gameState.streak;
+            document.getElementById('score-container').classList.remove('hidden');
+            document.getElementById('streak-container').classList.remove('hidden');
+        }
+
+        function renderQuestion() {
+            gameState.hasAnsweredCurrent = false;
+            const q = gameState.currentQuestions[gameState.currentIndex];
+            const total = gameState.currentQuestions.length;
+
+            // Hide inline explanation panel
+            const inlinePanel = document.getElementById('inline-explanation-panel');
+            inlinePanel.classList.add('hidden');
+
+            // Update Progress
+            const progressPercent = ((gameState.currentIndex) / total) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('question-progress').innerText = `問題 ${gameState.currentIndex + 1} / ${total}`;
+
+            // Update Stage Badge
+            const badge = document.getElementById('stage-badge');
+            if (q.stage === 1) {
+                badge.innerText = 'Part 1：GDP 判定特訓';
+                badge.className = 'px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-bold';
+            } else if (q.stage === 2) {
+                badge.innerText = 'Part 2：GNI 及要素收益特訓';
+                badge.className = 'px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold';
+            } else {
+                badge.innerText = 'Part 3：DSE MC 模擬與組合題';
+                badge.className = 'px-3 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-bold';
+            }
+
+            // Question Info
+            document.getElementById('card-tag').innerText = `[${q.conceptTag}]`;
+            document.getElementById('card-ref-badge').innerText = q.ref || 'HKDSE';
+            document.getElementById('card-question').innerText = q.title;
+
+            // Reset Controls
+            if (q.type === 'binary') {
+                document.getElementById('controls-binary').classList.remove('hidden');
+                document.getElementById('controls-mc').classList.add('hidden');
+
+                const btnFalse = document.getElementById('btn-binary-false');
+                const btnTrue = document.getElementById('btn-binary-true');
+
+                btnFalse.disabled = false;
+                btnTrue.disabled = false;
+
+                btnFalse.className = "option-btn group py-4 px-3 rounded-2xl bg-slate-900/90 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/60 active:scale-95 transition shadow-lg flex flex-col items-center justify-center";
+                btnTrue.className = "option-btn group py-4 px-3 rounded-2xl bg-slate-900/90 hover:bg-emerald-950/60 border border-slate-700 hover:border-emerald-500/60 active:scale-95 transition shadow-lg flex flex-col items-center justify-center";
+
+                if (q.stage === 1) {
+                    document.getElementById('btn-label-false').innerText = '不計入 GDP';
+                    document.getElementById('btn-label-true').innerText = '計入 GDP';
+                } else {
+                    document.getElementById('btn-label-false').innerText = '不計入 / 扣減';
+                    document.getElementById('btn-label-true').innerText = '計入香港 GNI';
+                }
+            } else {
+                document.getElementById('controls-binary').classList.add('hidden');
+                document.getElementById('controls-mc').classList.remove('hidden');
+
+                for (let i = 0; i < 4; i++) {
+                    const btn = document.getElementById(`mc-btn-${i}`);
+                    const tag = document.getElementById(`mc-tag-${i}`);
+                    btn.disabled = false;
+                    btn.className = "option-btn mc-btn w-full p-3.5 rounded-2xl bg-slate-900 hover:bg-indigo-950/80 border border-slate-700 hover:border-indigo-500/60 text-left flex items-start space-x-3 transition active:scale-[0.99] group";
+                    tag.className = "bg-indigo-600 group-hover:bg-indigo-500 text-white w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow";
+                    tag.innerText = ['A','B','C','D'][i];
+                    document.getElementById(`mc-opt-${i}`).innerText = q.options[i];
+                }
+            }
+        }
+
+        function handleBinaryChoice(userChoice) {
+            if (gameState.hasAnsweredCurrent) return;
+            const q = gameState.currentQuestions[gameState.currentIndex];
+            const isCorrect = (userChoice === q.correct);
+            processAnswer(isCorrect, userChoice);
+        }
+
+        function handleMCChoice(optionIndex) {
+            if (gameState.hasAnsweredCurrent) return;
+            const q = gameState.currentQuestions[gameState.currentIndex];
+            const isCorrect = (optionIndex === q.correct);
+            processAnswer(isCorrect, optionIndex);
+        }
+
+        function processAnswer(isCorrect, userChoice) {
+            gameState.hasAnsweredCurrent = true;
+            const q = gameState.currentQuestions[gameState.currentIndex];
+
+            gameState.userAnswers.push({
+                question: q,
+                userChoice: userChoice,
+                isCorrect: isCorrect
+            });
+
+            if (isCorrect) {
+                gameState.streak++;
+                if (gameState.streak > gameState.maxStreak) {
+                    gameState.maxStreak = gameState.streak;
+                }
+                const points = 100 + (gameState.streak > 1 ? (gameState.streak - 1) * 20 : 0);
+                gameState.score += points;
+
+                if (gameState.streak >= 3) {
+                    playSound('combo');
+                } else {
+                    playSound('correct');
+                }
+            } else {
+                gameState.streak = 0;
+                playSound('wrong');
+            }
+
+            updateHeaderStats();
+            renderInlineFeedback(isCorrect, userChoice, q);
+        }
+
+        function renderInlineFeedback(isCorrect, userChoice, q) {
+            // Disable all option buttons & highlight correct vs user choices
+            if (q.type === 'binary') {
+                const btnFalse = document.getElementById('btn-binary-false');
+                const btnTrue = document.getElementById('btn-binary-true');
+
+                btnFalse.disabled = true;
+                btnTrue.disabled = true;
+
+                if (q.correct === false) {
+                    btnFalse.className = "option-btn group py-4 px-3 rounded-2xl bg-rose-900/60 border-2 border-rose-500 text-rose-200 flex flex-col items-center justify-center shadow-xl ring-2 ring-rose-500/40";
+                    if (!isCorrect) {
+                        btnTrue.className = "option-btn group py-4 px-3 rounded-2xl bg-slate-900/50 opacity-40 border border-slate-800 flex flex-col items-center justify-center";
+                    }
+                } else {
+                    btnTrue.className = "option-btn group py-4 px-3 rounded-2xl bg-emerald-900/60 border-2 border-emerald-500 text-emerald-200 flex flex-col items-center justify-center shadow-xl ring-2 ring-emerald-500/40";
+                    if (!isCorrect) {
+                        btnFalse.className = "option-btn group py-4 px-3 rounded-2xl bg-slate-900/50 opacity-40 border border-slate-800 flex flex-col items-center justify-center";
+                    }
+                }
+            } else {
+                for (let i = 0; i < 4; i++) {
+                    const btn = document.getElementById(`mc-btn-${i}`);
+                    const tag = document.getElementById(`mc-tag-${i}`);
+                    btn.disabled = true;
+
+                    if (i === q.correct) {
+                        // Correct option styling
+                        btn.className = "option-btn w-full p-3.5 rounded-2xl bg-emerald-950/80 border-2 border-emerald-500 text-left flex items-start space-x-3 shadow-lg";
+                        tag.className = "bg-emerald-500 text-slate-950 font-black w-6 h-6 rounded-lg flex items-center justify-center text-xs shrink-0 mt-0.5 shadow";
+                        tag.innerText = "✓";
+                    } else if (i === userChoice && !isCorrect) {
+                        // User's wrong pick styling
+                        btn.className = "option-btn w-full p-3.5 rounded-2xl bg-rose-950/80 border-2 border-rose-500 text-left flex items-start space-x-3 opacity-90 shadow-lg";
+                        tag.className = "bg-rose-500 text-white font-bold w-6 h-6 rounded-lg flex items-center justify-center text-xs shrink-0 mt-0.5 shadow";
+                        tag.innerText = "✕";
+                    } else {
+                        // Unselected option styling
+                        btn.className = "option-btn w-full p-3.5 rounded-2xl bg-slate-900/40 border border-slate-800/80 text-left flex items-start space-x-3 opacity-40";
+                    }
+                }
+            }
+
+            // Show Inline Explanation Panel directly below
+            const panel = document.getElementById('inline-explanation-panel');
+            const icon = document.getElementById('inline-result-icon');
+            const title = document.getElementById('inline-result-title');
+            const conceptTag = document.getElementById('inline-concept-tag');
+            const expText = document.getElementById('inline-explanation-text');
+
+            if (isCorrect) {
+                icon.innerText = gameState.streak >= 3 ? '🔥' : '✓';
+                title.innerText = gameState.streak >= 3 ? `回答正確！連勝 ${gameState.streak} 題！` : '回答完全正確！';
+                title.className = 'font-black text-sm sm:text-base text-emerald-400';
+            } else {
+                icon.innerText = '✕';
+                title.innerText = '答案不正確，請細心參閱下方的 DSE 題解！';
+                title.className = 'font-black text-sm sm:text-base text-rose-400';
+            }
+
+            conceptTag.innerText = q.conceptTag;
+            expText.innerText = q.explanation;
+
+            panel.classList.remove('hidden');
+
+            // Smooth scroll to explanation on smaller screens
+            setTimeout(() => {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            gameState.currentIndex++;
+            if (gameState.currentIndex < gameState.currentQuestions.length) {
+                renderQuestion();
+            } else {
+                showResultsScreen();
+            }
+        }
+
+        function showResultsScreen() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const totalQ = gameState.userAnswers.length;
+            const correctQ = gameState.userAnswers.filter(a => a.isCorrect).length;
+            const accuracy = Math.round((correctQ / totalQ) * 100);
+
+            document.getElementById('res-total-score').innerText = gameState.score;
+            document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('res-max-streak').innerText = gameState.maxStreak;
+
+            const gradeBadge = document.getElementById('result-grade-badge');
+            const commentary = document.getElementById('result-commentary');
+
+            if (accuracy >= 90) {
+                gradeBadge.innerText = 'Level 5**';
+                commentary.innerText = '頂級經濟學霸！對 (1)(2)(3) 組合題及 NFI 細節掌握極度精準，直衝 DSE 5** 榮耀！';
+            } else if (accuracy >= 80) {
+                gradeBadge.innerText = 'Level 5*';
+                commentary.innerText = '表現非常優秀！常住居民與要素收益概念清晰，具備衝擊 5** 實力！';
+            } else if (accuracy >= 70) {
+                gradeBadge.innerText = 'Level 5';
+                commentary.innerText = '穩奪高分區！細心溫習錯題本，特別是轉移支付與資本增值陷阱即可再進一步！';
+            } else if (accuracy >= 60) {
+                gradeBadge.innerText = 'Level 4';
+                commentary.innerText = '表現平穩達標！建議針對 Part 3 組合題及計算題加強邏輯推理。';
+            } else if (accuracy >= 50) {
+                gradeBadge.innerText = 'Level 3';
+                commentary.innerText = '基礎尚可，但部分題目容易與日常生活直覺混淆，請參閱「DSE 秘笈」！';
+            } else {
+                gradeBadge.innerText = 'Level U';
+                commentary.innerText = '概念仍有較多模糊處，切勿灰心，重溫下方錯題本並重新挑戰！';
+            }
+
+            // Render Error Notebook (錯題集)
+            const mistakes = gameState.userAnswers.filter(a => !a.isCorrect);
+            const mistakeBadge = document.getElementById('mistake-count-badge');
+            const mistakeList = document.getElementById('mistake-list');
+            mistakeList.innerHTML = '';
+
+            mistakeBadge.innerText = `${mistakes.length} 題需要重溫`;
+
+            if (mistakes.length === 0) {
+                mistakeList.innerHTML = `
+                    <div class="text-center py-6 text-slate-400 text-xs font-medium">
+                        🎉 太厲害了！你答對了所有題目，沒有任何錯題記錄！
+                    </div>
+                `;
+            } else {
+                mistakes.forEach((m, idx) => {
+                    const q = m.question;
+                    let userChoiceText = '';
+                    let correctText = '';
+
+                    if (q.type === 'binary') {
+                        userChoiceText = m.userChoice ? '計入' : '不計入/扣減';
+                        correctText = q.correct ? '計入' : '不計入/扣減';
+                    } else {
+                        userChoiceText = `選項 ${['A','B','C','D'][m.userChoice]}`;
+                        correctText = `選項 ${['A','B','C','D'][q.correct]}`;
+                    }
+
+                    const item = document.createElement('div');
+                    item.className = 'bg-slate-950 p-4 rounded-2xl border border-rose-500/20 space-y-2 text-xs';
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between text-slate-300 font-bold border-b border-slate-800 pb-1.5">
+                            <span class="text-amber-400">錯題 #${idx + 1} [${q.conceptTag}]</span>
+                            <span class="text-rose-400 font-mono">你的選擇: ${userChoiceText}</span>
+                        </div>
+                        <p class="text-slate-200 leading-relaxed font-medium whitespace-pre-line">${q.title}</p>
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 leading-relaxed">
+                            <span class="text-emerald-400 font-bold">考評局正確答案：${correctText}</span><br>
+                            <span class="text-slate-400 text-[11px] mt-1 block whitespace-pre-line">${q.explanation}</span>
+                        </div>
+                    `;
+                    mistakeList.appendChild(item);
+                });
+            }
+        }
+
+        function resetGame() {
+            startGame(gameState.mode);
+        }
+
+        function toggleCheatSheet(show) {
+            const modal = document.getElementById('modal-cheatsheet');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
